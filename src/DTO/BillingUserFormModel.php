@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\UniqueUser;
 
 class BillingUserFormModel
 {
@@ -11,6 +12,7 @@ class BillingUserFormModel
      * @JMS\Type("string")
      * @Assert\NotBlank(message="Enter email")
      * @Assert\Email(message="Invalid email")
+     * @UniqueUser()
      */
     public $email;
     /**

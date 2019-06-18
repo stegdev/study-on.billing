@@ -110,4 +110,13 @@ class BillingUser implements UserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public static function fromDto($userDto, $passwordEncoder)
+    {
+        $billingUser = new BillingUser();
+        $billingUser->setEmail($userDto->email);
+        $billingUser->setRoles(['ROLE_USER']);
+        $billingUser->setPassword($passwordEncoder->encodePassword($billingUser, $userDto->password));
+        return $billingUser;
+    }
 }
