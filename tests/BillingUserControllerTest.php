@@ -18,6 +18,15 @@ class BillingUserControllerTest extends AbstractTest
         $this->AssertContains('"token"', $client->getResponse()->getContent());
         $this->AssertContains('"roles":["ROLE_USER"]', $client->getResponse()->getContent());
     }
+
+    public function testLoginSuperUser()
+    {
+        $client = static::createClient();
+        $client->request('POST', '/api/v1/auth', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode(['username' => 'adminUser@gmail.com', 'password' => 'passwordForAdminUser']));
+        $this->AssertContains('"token"', $client->getResponse()->getContent());
+        $this->AssertContains('"ROLE_SUPER_ADMIN"', $client->getResponse()->getContent());
+    }
+
     public function testLoginUserInvalidPassword()
     {
         $client = static::createClient();
