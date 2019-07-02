@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use JMS\Serializer\SerializerBuilder;
-use App\DTO\BillingUserFormModel;
+use App\DTO\BillingUserDTO;
 use Swagger\Annotations as SWG;
 use App\Entity\BillingUser;
 class BillingController extends AbstractController
@@ -180,7 +180,7 @@ class BillingController extends AbstractController
     {
         $response = new Response();
         $serializer = SerializerBuilder::create()->build();
-        $userDto = $serializer->deserialize($request->getContent(), BillingUserFormModel::class, 'json');
+        $userDto = $serializer->deserialize($request->getContent(), BillingUserDTO::class, 'json');
         $errors = $validator->validate($userDto);
         if (count($errors) > 0) {
             $jsonErrors = [];

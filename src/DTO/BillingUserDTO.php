@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\UniqueUser;
 
-class BillingUserFormModel
+class BillingUserDTO
 {
     /**
      * @JMS\Type("string")

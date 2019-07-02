@@ -4,6 +4,7 @@ volumes:
 services:
   nginx:
     image: nginx:alpine
+    container_name: billing.study-on.local
     working_dir: /app
     volumes:
       - ${PWD}:/app
@@ -23,7 +24,6 @@ services:
   php:
     build: docker/images/php
     working_dir: /app
-    user: ${UID:-1000}:${GID:-1000}
     volumes:
       - ${PWD}:/app
       - ${HOME}/.composer:/.composer
@@ -31,3 +31,4 @@ services:
       - COMPOSER_ALLOW_SUPERUSER=1
     links:
       - postgres
+    user: ${UID:-1000}:${GID:-1000}
