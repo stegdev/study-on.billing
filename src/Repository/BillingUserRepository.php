@@ -18,7 +18,6 @@ class BillingUserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, BillingUser::class);
     }
-
     // /**
     //  * @return BillingUser[] Returns an array of BillingUser objects
     //  */
