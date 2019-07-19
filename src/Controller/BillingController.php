@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controller;
+
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -19,6 +21,7 @@ use App\Entity\BillingUser;
 use App\Service\PaymentService;
 use App\Entity\Course;
 use App\Entity\Transaction;
+
 class BillingController extends AbstractController
 {
     /**
@@ -257,7 +260,8 @@ class BillingController extends AbstractController
      */
     public function currentUser()
     {
-        $user = ($this->container->get('security.token_storage')->getToken())->getUser();
+        $user = $this->getUser();
+        //$user = ($this->container->get('security.token_storage')->getToken())->getUser();
 
         $response = new Response();
         $response->setContent(json_encode(["username" => $user->getUsername(), "roles" => $user->getRoles(), "balance" => $user->getBalance()]));
@@ -403,11 +407,11 @@ class BillingController extends AbstractController
      */
     public function transactions(Request $request)
     {
+        $user = $this->getUser();
         $courseCode = $request->query->get('course_code');
         $type = $request->query->get('type');
         $skipExpired = $request->query->get('skip_expired');
-
-        $transactions = $this->getDoctrine()->getRepository(Transaction::class)->findAllTransactions($type, $courseCode, $skipExpired);
+        $transactions = $this->getDoctrine()->getRepository(Transaction::class)->findAllTransactions($user, $courseCode, $type, $skipExpired);
         $response = new Response();
 
         $response->setContent($transactions);
@@ -498,7 +502,7 @@ class BillingController extends AbstractController
      */
     public function coursePay($code, PaymentService $paymentService)
     {
-        $user = ($this->container->get('security.token_storage')->getToken())->getUser();
+        $user = $this->getUser();
         $response = new Response();
         $response->setContent($paymentService->paymentTransaction($user->getId(), $code));
         $response->setStatusCode(Response::HTTP_OK);

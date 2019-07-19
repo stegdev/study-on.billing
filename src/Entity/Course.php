@@ -1,11 +1,19 @@
 <?php
+
 namespace App\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CourseRepository")
  */
 class Course
 {
+    const RENT_COURSE = 0;
+    const BUY_COURSE = 1;
+    const FREE_COURSE = 2;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -17,6 +25,10 @@ class Course
      */
     private $code;
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $title;
+    /**
      * @ORM\Column(type="smallint")
      */
     private $type;
@@ -24,6 +36,14 @@ class Course
      * @ORM\Column(type="float")
      */
     private $price;
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="course")
+     */
+    private $transactions;
+    public function __construct()
+    {
+        $this->transactions = new ArrayCollection();
+    }
     public function getId(): ?int
     {
         return $this->id;
@@ -37,6 +57,15 @@ class Course
         $this->code = $code;
         return $this;
     }
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+        return $this;
+    }
     public function getType(): ?int
     {
         return $this->type;
@@ -46,6 +75,20 @@ class Course
         $this->type = $type;
         return $this;
     }
+    public function getConvertedType(): ?string
+    {
+        switch ($this->getType()) {
+            case self::RENT_COURSE:
+                return 'rent';
+                break;
+            case  self::BUY_COURSE:
+                return 'buy';
+                break;
+            case self::FREE_COURSE:
+                return 'free';
+                break;
+        }
+    }
     public function getPrice(): ?float
     {
         return $this->price;
@@ -54,5 +97,53 @@ class Course
     {
         $this->price = $price;
         return $this;
+    }
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactions(): Collection
+    {
+        return $this->transactions;
+    }
+    public function addTransaction(Transaction $transaction): self
+    {
+        if (!$this->transactions->contains($transaction)) {
+            $this->transactions[] = $transaction;
+            $transaction->setCourse($this);
+        }
+        return $this;
+    }
+    public function removeTransaction(Transaction $transaction): self
+    {
+        if ($this->transactions->contains($transaction)) {
+            $this->transactions->removeElement($transaction);
+            // set the owning side to null (unless already changed)
+            if ($transaction->getCourse() === $this) {
+                $transaction->setCourse(null);
+            }
+        }
+        return $this;
+    }
+    public static function fromDto($course, $courseDto)
+    {
+        if (!isset($course)) {
+            $course = new Course();
+        }
+        $course->setCode($courseDto->code);
+        $course->setTitle($courseDto->title);
+        switch ($courseDto->type) {
+            case 'rent':
+                $courseDto->type = self::RENT_COURSE;
+                break;
+            case 'buy':
+                $courseDto->type = self::BUY_COURSE;
+                break;
+            case 'free':
+                $courseDto->type = self::FREE_COURSE;
+                break;
+        }
+        $course->setType($courseDto->type);
+        $course->setPrice($courseDto->price);
+        return $course;
     }
 }
