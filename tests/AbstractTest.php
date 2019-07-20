@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Tests;
+
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Doctrine\Common\DataFixtures\AbstractFixture;
@@ -11,10 +14,12 @@ use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
+
 abstract class AbstractTest extends WebTestCase
 {
     /** @var Client */
     protected static $client;
+
     protected static function getClient($reinitialize = false, array $options = [], array $server = [])
     {
         if (!static::$client || $reinitialize) {
@@ -55,10 +60,13 @@ abstract class AbstractTest extends WebTestCase
     {
         /** @var UserPasswordEncoderInterface $encoder */
         $encoder = self::$kernel->getContainer()->get('security.password_encoder');
+
+        $paymentService = self::$kernel->getContainer()->get('App\Service\PaymentService');
+
         $loader = new Loader();
         foreach ($fixtures as $fixture) {
             if (!\is_object($fixture)) {
-                $fixture = new $fixture($encoder);
+                $fixture = new $fixture($encoder, $paymentService);
             }
             if ($fixture instanceof ContainerAwareInterface) {
                 $fixture->setContainer(static::$container);
@@ -70,6 +78,7 @@ abstract class AbstractTest extends WebTestCase
         $executor = new ORMExecutor($em, $purger);
         $executor->execute($loader->getFixtures());
     }
+
     public function assertResponseOk(?Response $response = null, ?string $message = null, string $type = 'text/html')
     {
         $this->failOnResponseStatusCheck($response, 'isOk', $message, $type);
